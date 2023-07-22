@@ -3,7 +3,7 @@ open Common
 module Table = Int_star_int_to_string
 
 let%expect_test "empty table" =
-  let t = Table.create ~path:"foo" in
+  let t = Table.create ~path:"foo" |> Or_error.ok_exn in
   print_endline (Table.to_string_for_testing t);
   [%expect
     {|
@@ -15,8 +15,8 @@ let%expect_test "empty table" =
 ;;
 
 let%expect_test "single put" =
-  let t = Table.create ~path:"foo" in
-  Table.put t ~key:(0, 0) ~data:"hi";
+  let t = Table.create ~path:"foo" |> Or_error.ok_exn in
+  Table.put t ~key:(0, 0) ~data:"hi" |> Or_error.ok_exn;
   print_endline (Table.to_string_for_testing t);
   [%expect
     {|
@@ -29,11 +29,11 @@ let%expect_test "single put" =
 ;;
 
 let%expect_test "multi put" =
-  let t = Table.create ~path:"foo" in
-  Table.put t ~key:(0, 0) ~data:"a";
-  Table.put t ~key:(0, 1) ~data:"b";
-  Table.put t ~key:(1, 0) ~data:"c";
-  Table.put t ~key:(1, 1) ~data:"d";
+  let t = Table.create ~path:"foo" |> Or_error.ok_exn in
+  Table.put t ~key:(0, 0) ~data:"a" |> Or_error.ok_exn;
+  Table.put t ~key:(0, 1) ~data:"b" |> Or_error.ok_exn;
+  Table.put t ~key:(1, 0) ~data:"c" |> Or_error.ok_exn;
+  Table.put t ~key:(1, 1) ~data:"d" |> Or_error.ok_exn;
   print_endline (Table.to_string_for_testing t);
   [%expect
     {|

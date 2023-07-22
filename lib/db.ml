@@ -1,60 +1,6 @@
 open! Core
 include Db_intf
 
-module Serializable = struct
-  module type S = Serializable
-
-  module Int = struct
-    type t = int
-
-    let size _ = 8
-    let to_bytes (i : int) buf = Iobuf.Fill.int64_be buf i
-    let of_bytes buf = Iobuf.Consume.int64_be_exn buf
-    let to_string_for_testing = Int.to_string
-  end
-
-  module String = struct
-    type t = string
-
-    let size s = String.length s + 8
-
-    let to_bytes s buf =
-      Iobuf.Fill.int64_be buf (String.length s);
-      Iobuf.Fill.stringo buf s
-    ;;
-
-    let of_bytes buf =
-      let len = Iobuf.Consume.int64_be_exn buf in
-      Iobuf.Consume.stringo ~len buf
-    ;;
-
-    let to_string_for_testing = Fn.id
-  end
-
-  module Pair (A : S) (B : S) = struct
-    type t = A.t * B.t
-
-    let size (a, b) = A.size a + B.size b + 1
-
-    let to_bytes (a, b) iobuf =
-      A.to_bytes a iobuf;
-      Iobuf.Fill.uint8_trunc iobuf 0;
-      B.to_bytes b iobuf
-    ;;
-
-    let of_bytes iobuf =
-      let a = A.of_bytes iobuf in
-      let (_ : int) = Iobuf.Consume.int8 iobuf in
-      let b = B.of_bytes iobuf in
-      a, b
-    ;;
-
-    let to_string_for_testing (a, b) =
-      sprintf "(%s, %s)" (A.to_string_for_testing a) (B.to_string_for_testing b)
-    ;;
-  end
-end
-
 module Make (Backend : Backend_intf.S) (Key : Serializable.S) (Data : Serializable.S) =
 struct
   type t = Backend.t

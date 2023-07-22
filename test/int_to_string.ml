@@ -3,7 +3,7 @@ open Common
 module Table = Int_to_string
 
 let%expect_test "empty table" =
-  let t = Table.create ~path:"foo" in
+  let t = Table.create ~path:"foo" |> Or_error.ok_exn in
   print_endline (Table.to_string_for_testing t);
   [%expect
     {|
@@ -15,8 +15,8 @@ let%expect_test "empty table" =
 ;;
 
 let%expect_test "single put" =
-  let t = Table.create ~path:"foo" in
-  Table.put t ~key:0 ~data:"hi";
+  let t = Table.create ~path:"foo" |> Or_error.ok_exn in
+  Table.put t ~key:0 ~data:"hi" |> Or_error.ok_exn;
   print_endline (Table.to_string_for_testing t);
   [%expect
     {|
@@ -28,9 +28,9 @@ let%expect_test "single put" =
 ;;
 
 let%expect_test "multi put" =
-  let t = Table.create ~path:"foo" in
-  Table.put t ~key:0 ~data:"hello";
-  Table.put t ~key:1 ~data:"world";
+  let t = Table.create ~path:"foo" |> Or_error.ok_exn in
+  Table.put t ~key:0 ~data:"hello" |> Or_error.ok_exn;
+  Table.put t ~key:1 ~data:"world" |> Or_error.ok_exn;
   print_endline (Table.to_string_for_testing t);
   [%expect
     {|
@@ -43,9 +43,9 @@ let%expect_test "multi put" =
 ;;
 
 let%expect_test "put and then delete" =
-  let t = Table.create ~path:"foo" in
-  Table.put t ~key:0 ~data:"hello";
-  Table.put t ~key:1 ~data:"world";
+  let t = Table.create ~path:"foo" |> Or_error.ok_exn in
+  Table.put t ~key:0 ~data:"hello" |> Or_error.ok_exn;
+  Table.put t ~key:1 ~data:"world" |> Or_error.ok_exn;
   print_endline (Table.to_string_for_testing t);
   [%expect
     {|
@@ -55,7 +55,7 @@ let%expect_test "put and then delete" =
     │ 0   │ hello │ 00000000  00 00 00 00 00 00 00 00                           |........| │ 00000000  00 00 00 00 00 00 00 05  68 65 6c 6c 6f           |........hello| │
     │ 1   │ world │ 00000000  00 00 00 00 00 00 00 01                           |........| │ 00000000  00 00 00 00 00 00 00 05  77 6f 72 6c 64           |........world| │
     └─────┴───────┴────────────────────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────────────────┘ |}];
-  Table.delete t 0;
+  Table.delete t 0 |> Or_error.ok_exn;
   print_endline (Table.to_string_for_testing t);
   [%expect
     {|

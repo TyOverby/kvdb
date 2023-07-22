@@ -1,8 +1,8 @@
 open! Core
 
 module Table =
-  Kvdb.Db.Make (Kvdb.Backend.Rocksdb_backend) (Kvdb.Db.Serializable.Int)
-    (Kvdb.Db.Serializable.String)
+  Kvdb.Db.Make (Kvdb.Backend.Rocksdb_backend) (Kvdb.Serializable.Int64)
+    (Kvdb.Serializable.String)
 
 let _main () =
   let open Or_error.Let_syntax in
