@@ -4,6 +4,33 @@ include Db_intf
 module Serializable = struct
   module type S = Serializable
 
+  module Int = struct
+    type t = int
+
+    let size _ = 8
+    let to_bytes (i : int) buf = Iobuf.Fill.int64_be buf i
+    let of_bytes buf = Iobuf.Consume.int64_be_exn buf
+    let to_string_for_testing = Int.to_string
+  end
+
+  module String = struct
+    type t = string
+
+    let size s = String.length s + 8
+
+    let to_bytes s buf =
+      Iobuf.Fill.int64_be buf (String.length s);
+      Iobuf.Fill.stringo buf s
+    ;;
+
+    let of_bytes buf =
+      let len = Iobuf.Consume.int64_be_exn buf in
+      Iobuf.Consume.stringo ~len buf
+    ;;
+
+    let to_string_for_testing = Fn.id
+  end
+
   module Pair (A : S) (B : S) = struct
     type t = A.t * B.t
 
@@ -48,7 +75,10 @@ struct
     let key_buf = Iobuf.create ~len:(Key.size key) in
     Key.to_bytes key key_buf;
     Iobuf.reset key_buf;
-    Backend.get t key_buf |> Option.map ~f:Data.of_bytes
+    match Backend.get t key_buf with
+    | Ok (Some v) -> Ok (Some (Data.of_bytes v))
+    | Error e -> Error e
+    | Ok None -> Ok None
   ;;
 
   let delete t key =
@@ -100,7 +130,7 @@ struct
       ]
     in
     fun t ->
-      let iter = iterate t in
+      let iter = iterate t |> Or_error.ok_exn in
       let rows = ref [] in
       while Iter.is_valid iter do
         let row = Iter.get iter |> Option.value_exn in
