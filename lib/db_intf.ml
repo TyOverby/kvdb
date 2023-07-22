@@ -1,16 +1,17 @@
 open! Core
 
-module type Stringable = sig
+module type Serializable = sig
   type t
 
-  val to_string : t -> string
-  val of_string : string -> t
+  val size : t -> int
+  val to_bytes : t -> (read_write, Iobuf.seek) Iobuf.t -> unit
+  val of_bytes : (read_write, Iobuf.seek) Iobuf.t -> t
   val to_string_for_testing : t -> string
 end
 
 module type S = sig
-  module Key : Stringable
-  module Data : Stringable
+  module Key : Serializable
+  module Data : Serializable
   module Backend : Backend.S
 
   type t
@@ -38,7 +39,13 @@ module Db = struct
   module type M = sig
     module type S = S
 
-    module Make (Backend : Backend_intf.S) (Key : Stringable) (Data : Stringable) :
+    module Serializable : sig
+      module type S = Serializable
+
+      module Pair (A : S) (B : S) : S with type t = A.t * B.t
+    end
+
+    module Make (Backend : Backend_intf.S) (Key : Serializable.S) (Data : Serializable.S) :
       S with module Backend := Backend and module Key := Key and module Data := Data
   end
 end
