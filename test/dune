@@ -1,0 +1,5 @@
+(library
+ (name kvdb_test)
+ (inline_tests)
+ (libraries kvdb expect_test_helpers_core core core_kernel.iobuf)
+ (preprocess (pps ppx_jane)))
