@@ -86,6 +86,7 @@ module String = struct
 
   let size s = String.length s + 8
 
+  (* TODO: make a null-terminated-string type *)
   let to_bytes s buf =
     Iobuf.Fill.int64_be buf (String.length s);
     Iobuf.Fill.stringo buf s
