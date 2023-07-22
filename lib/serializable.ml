@@ -145,28 +145,6 @@ module Iso (U : S) (C : Convert with type underlying := U.t) = struct
   ;;
 end
 
-module Time_ms =
-  Iso
-    (Uint32)
-    (struct
-      type t = Time_ns.t
-
-      let t_of_underlying v = Time_ns.of_span_since_epoch (Time_ns.Span.of_int_ms v)
-      let underlying_of_t t = t |> Time_ns.to_span_since_epoch |> Time_ns.Span.to_int_ms
-      let to_string_for_testing = `Use_underlying
-    end)
-
-module Time_ms_span =
-  Iso
-    (Uint32)
-    (struct
-      type t = Time_ns.Span.t
-
-      let t_of_underlying = Time_ns.Span.of_int_ms
-      let underlying_of_t = Time_ns.Span.to_int_ms
-      let to_string_for_testing = `Use_underlying
-    end)
-
 module Time_sec =
   Iso
     (Uint32)

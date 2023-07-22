@@ -26,8 +26,6 @@ module Uint8 : S with type t = int
 (* time *)
 module Time_ns : S with type t = Core.Time_ns.t
 module Time_ns_span : S with type t = Core.Time_ns.Span.t
-module Time_ms : S with type t = Core.Time_ns.t
-module Time_ms_span : S with type t = Core.Time_ns.Span.t
 module Time_sec : S with type t = Core.Time_ns.t
 module Time_sec_span : S with type t = Core.Time_ns.Span.t
 
